@@ -1,0 +1,40 @@
+---
+description: 列表页标准规范，参照 src/views/storage/tapeLibrary/index.vue 的结构与约定
+globs: src/views/**/index.vue
+alwaysApply: false
+---
+
+# 列表页规范
+
+新建或改版「带搜索、表格、分页」的列表页时，以 [src/views/storage/tapeLibrary/index.vue](src/views/storage/tapeLibrary/index.vue) 为参照，遵循以下约定。
+
+## 1. 整体结构（自上而下）
+
+- 单根节点：`<div class="<块名>">`（块名与页面语义一致，如 `tape-library`、`drive`、`tape`），内包一层 `<el-card>`。
+- 区块顺序固定：**搜索表单 → 操作栏（左侧主按钮 + 右侧刷新图标）→ 表格 → 分页**。
+
+## 2. 命名与样式（BEM + 主题变量）
+
+- **BEM**：块名使用与页面语义一致的 kebab-case，子元素用双下划线，如 `<块>__form`、`<块>__form-actions`、`<块>__toolbar`、`<块>__toolbar-left`、`<块>__toolbar-right`、`<块>__table`、`<块>__refresh-icon`。
+- **样式块**：统一 `<style lang="scss" scoped>`，无内联样式。
+- **主题变量**：颜色与边框使用 CSS 变量（如 `var(--el-bg-color-white)`、`var(--el-border-color)`、`var(--el-color-main)`），不写死色值。
+- **布局**：页面与卡片均为 `height: 100%` + `flex` 列布局；表格区域 `flex: 1` + `overflow: hidden`，内部通过 `:deep(.el-table)` 使用 `position: absolute` 填满，保证表格在弹性布局下高度正确。
+
+## 3. 使用的项目组件
+
+- **表格**：`TheTable`，传入 `:data`、`:columns`（列配置含 `prop`、`label`、可选 `width`、`slot: 'operation'` 等）。
+- **分页**：`ThePagination`，传入 `:total`、`:page-size`、`:current-page`；监听 `@size-change` 与 `@current-change`，在回调中统一用 `{ page, size }` 更新分页状态并调用列表请求（或使用项目内若已封装的 `@page-change` 统一事件）。
+
+## 4. 脚本约定（Script）
+
+- 使用 `<script setup lang="ts">`。
+- 对重要 ref 和函数用 JSDoc 注释说明用途。
+- 分页与列表：`total`、`pageSize`、`currentPage`、`tableData`、`tableColumns` 独立 ref；分页变更时更新页码/每页条数并调用搜索/列表请求（如 `handleSearch()`）。
+- 搜索：`searchForm` + `searchFormRef`，重置使用 `searchFormRef.value?.resetFields()`。
+- 事件参数使用项目全局类型（如 `PageParam` 在 [src/types/global.d.ts](src/types/global.d.ts)）。
+
+## 5. 参考文件
+
+- 标准示例：[src/views/storage/tapeLibrary/index.vue](src/views/storage/tapeLibrary/index.vue)
+- 表格组件：[src/components/TheTable/index.vue](src/components/TheTable/index.vue)
+- 分页组件：[src/components/ThePagination/index.vue](src/components/ThePagination/index.vue)
